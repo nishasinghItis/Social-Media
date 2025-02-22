@@ -3,6 +3,7 @@ import { createContext ,useReducer } from "react";
 export const PostList = createContext({
     postList:[],
     addPost:()=>{},
+    addInitialPosts:()=>{},
     deletePost:()=>{},
 });
 
@@ -10,17 +11,21 @@ const postListReducer = (currPostList, action)=>{
   let newcurrPostList=currPostList;
   if(action.type==="DELETE_ITEM"){
     newcurrPostList=currPostList.filter((post)=>
-    post.id!==action.payload.postId)
+    post.id!==action.payload.postId);
+  }
+  else if(action.type==="ADD_INITIAL_ITEM"){
+ 
+    newcurrPostList=action.payload.posts;
   }
   else if(action.type==="ADD_ITEM"){
     newcurrPostList= [action.payload, ...currPostList];
   }
   
     return newcurrPostList;
-}
+};
 
 const PostListProvider = ({ children }) => {
-  const [postList, dispatchPostList] = useReducer(postListReducer,DEFAULT_POST_LIST);
+  const [postList, dispatchPostList] = useReducer(postListReducer,[]);
 
   const addPost=(userId,postTitle,postBody,reactions,tags)=>{
     
@@ -39,6 +44,17 @@ const PostListProvider = ({ children }) => {
     })
   };
 
+  const addInitialPosts=(posts)=>{
+    
+    dispatchPostList({
+      type :"ADD_INITIAL_ITEM",
+        payload :{
+         posts ,
+
+        },
+    });
+  };
+
   const deletePost=(postId)=>{
     dispatchPostList({
       type :"DELETE_ITEM",
@@ -50,28 +66,11 @@ const PostListProvider = ({ children }) => {
   };
 
   return (
-    <PostList.Provider value={{ postList, addPost, deletePost }}>
+    <PostList.Provider value={{ postList, addPost, addInitialPosts, deletePost}}>
       {children}
     </PostList.Provider>
   );
 };
 
-const DEFAULT_POST_LIST = [
-  {
-    id: "1",
-    title: "Going to Mumbai",
-    body: "Hi Friends, finally going on a vacation with family during festive breaks",
-    reaction: 102,
-    userId: "user-9",
-    tags: ["vacation", "Family", "Fun"],
-  },
-  {
-    id: "2",
-    title: "Graduation Day",
-    body: "After four years of rigorous academics finally completes Btech",
-    reaction: 200,
-    userId: "user-9",
-    tags: ["proud", "unbelievable"],
-  },
-];
+
 export default PostListProvider;
